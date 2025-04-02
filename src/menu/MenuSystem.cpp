@@ -102,43 +102,35 @@ uint8_t MenuSystem::_calculatePercentage(uint8_t value255) {
 // --- Acceleration Helper ---
 // Calculates an accelerated step based on time between encoder events
 int MenuSystem::_calculateAcceleratedDiff(int raw_diff) {
-    if (raw_diff == 0) return 0; // No movement, no acceleration
+    if (raw_diff == 0) return 0; 
 
     uint32_t currentTime = millis();
-    uint32_t timeDiff = currentTime - _lastEncoderTime; // Time since last encoder change
+    uint32_t timeDiff = currentTime - _lastEncoderTime; 
     _lastEncoderTime = currentTime;
 
     // --- Define Acceleration Curve Parameters ---
-    const uint32_t MAX_TIME_MS = 150; // Slower than this -> multiplier = 1
-    const uint32_t MIN_TIME_MS = 20;  // Faster than this -> multiplier = MAX_MULT
-    const int MIN_MULT = 1;           // Multiplier for slowest speed
-    const int MAX_MULT = 30;          // Max multiplier for fastest speed (~512 / 16 clicks)
+    const uint32_t MAX_TIME_MS = 180; // Increased threshold for slowest speed (was 150)
+    const uint32_t MIN_TIME_MS = 20;  
+    const int MIN_MULT = 1;           
+    const int MAX_MULT = 30;          // Keep top speed high
 
     int multiplier = MIN_MULT;
 
-    if (timeDiff == 0) {
-        // Very first tick or multiple ticks in same ms, treat as fast?
-        // Let's treat as slow/medium to avoid jump start
+    // Remove special case for timeDiff == 0
+    /*if (timeDiff == 0) {
         multiplier = 5; 
-    } else if (timeDiff < MIN_TIME_MS) {
+    } else*/ if (timeDiff < MIN_TIME_MS) { // Fastest speed
         multiplier = MAX_MULT;
-    } else if (timeDiff < MAX_TIME_MS) {
-        // Interpolate between MIN_MULT and MAX_MULT based on timeDiff (inverted)
-        // factor = 0.0 when timeDiff = MAX_TIME_MS
-        // factor = 1.0 when timeDiff = MIN_TIME_MS
+    } else if (timeDiff < MAX_TIME_MS) { // Interpolation zone
         float factor = (float)(MAX_TIME_MS - timeDiff) / (float)(MAX_TIME_MS - MIN_TIME_MS);
-        // Apply a curve (e.g., power of 1.5) to make it non-linear 
-        // (ramp up slower initially, then faster)
-        factor = pow(factor, 1.5f);
+        // Increase exponent for a flatter start and steeper end
+        factor = pow(factor, 3.0f); // Was 2.5f
         multiplier = MIN_MULT + (int)(factor * (MAX_MULT - MIN_MULT));
     } 
-    // else timeDiff >= MAX_TIME_MS, multiplier remains MIN_MULT (which is 1)
+    // else timeDiff >= MAX_TIME_MS, multiplier remains MIN_MULT (1)
     
-    // Ensure multiplier is at least 1
     if (multiplier < MIN_MULT) multiplier = MIN_MULT; 
 
-    // Apply multiplier to the raw difference direction
-    // Important: Use the *sign* of raw_diff, not its magnitude, with the multiplier
     int acceleratedStep = ((raw_diff > 0) ? 1 : -1) * multiplier;
 
     Serial.printf(" Accel: raw=%d, time=%lu, mult=%d, step=%d\n", 
@@ -677,10 +669,10 @@ void MenuSystem::_drawSetStaticLook() {
         }
     }
 
-    // Hint text
+    // Hint text using the consistent format
     const char* hintText = _isEditingStaticLookValue ? 
-                           "T=Change|P=Select|H=Back" : 
-                           "T=Select|P=Edit|H=Back";
+                           "Turn=Change | Press=Select | Hold=Back" : // Edit Mode hint
+                           "Turn=Select | Press=Edit   | Hold=Back"; // Select Mode hint (added space for alignment)
     _drawFooter(hintText);
 }
 
