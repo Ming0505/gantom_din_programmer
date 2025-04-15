@@ -78,8 +78,8 @@ public:
     void _encoder_test_user();
 
     /* Buzzer */
-    inline void _tone(unsigned int frequency, unsigned long duration = 0UL) { tone(BUZZ_PIN, frequency, duration); }
-    inline void _noTone() { noTone(BUZZ_PIN); }
+    inline void _tone(unsigned int frequency, unsigned long duration = 0UL) { /* tone(BUZZ_PIN, frequency, duration); */ }
+    inline void _noTone() { /* noTone(BUZZ_PIN); */ }
 
     /* RTC */
     I2C_BM8563 _rtc;
