@@ -64,30 +64,30 @@ void GantomBootSplash::_drawSplash()
     // Calculate center coordinates for easier positioning
     int centerX = _ft->_canvas->width() / 2;
     int centerY = _ft->_canvas->height() / 2;
-    
-    // --- Draw Gantom Logo (Simplified version) ---
-    // Using basic shapes provided by LovyanGFX
-    
-    // White filled rectangle as the base for the logo text
-    _ft->_canvas->fillRoundRect(centerX - 50, centerY - 40, 100, 60, 10, TFT_WHITE); // White rectangle
-    
-    // Draw "GANTOM" text inside the rectangle
+
+    // --- Draw Gantom Logo in DMX-horizontal style ---
+    // Draw a white rounded rectangle as the logo background
+    int rect_w = 180; // width of the logo box
+    int rect_h = 60;  // height of the logo box
+    int rect_r = 12;  // corner radius
+    int rect_y = centerY - rect_h / 2 - 10; // slightly above center
+    _ft->_canvas->fillRoundRect(centerX - rect_w/2, rect_y, rect_w, rect_h, rect_r, TFT_WHITE);
+
+    // Draw 'GANTOM' text, centered in the rectangle
     _ft->_canvas->setTextColor(TFT_BLACK);  // Black text on white background
-    _ft->_canvas->setFont(&fonts::Font2); // Choose an appropriate font
-    _ft->_canvas->setTextSize(2);         // Make it relatively large
-    _ft->_canvas->drawCenterString("GANTOM", centerX, centerY - 25); // Position near top
-    
-    // Draw "DMX TOOL" text below "GANTOM"
-    _ft->_canvas->setTextSize(1);         // Smaller size
-    _ft->_canvas->drawCenterString("DMX TOOL", centerX, centerY + 5);  // Position below GANTOM
-    
-    // --- Draw Version Info --- 
+    _ft->_canvas->setFont(&fonts::Font2); // Use a bold/large font
+    _ft->_canvas->setTextSize(2);
+    _ft->_canvas->drawCenterString("GANTOM", centerX, rect_y + 16);
+
+    // Draw 'DMX TOOL' text below 'GANTOM'
+    _ft->_canvas->setTextSize(1);
+    _ft->_canvas->drawCenterString("DMX TOOL", centerX, rect_y + 40);
+
+    // --- Draw Version Info ---
     _ft->_canvas->setTextColor(TFT_WHITE);  // White text on black background
     _ft->_canvas->setFont(&fonts::Font0); // Smallest font
     _ft->_canvas->setTextSize(1);
-    // Use FW_VERISON defined in factory_test.h
-    // It might be redefined locally if missing, but let's ensure we use the primary one
-    _ft->_canvas->drawCenterString(FW_VERISON, centerX, centerY + 45); // Position below logo
+    _ft->_canvas->drawCenterString(FW_VERISON, centerX, rect_y + rect_h + 18); // below the logo box
 
     // Finish drawing and push to display
     _ft->_canvas->endWrite();

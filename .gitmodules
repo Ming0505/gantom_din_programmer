@@ -1,0 +1,3 @@
+[submodule "m5programmer"]
+	path = m5programmer
+	url = https://github.com/playztag/m5programmer.git

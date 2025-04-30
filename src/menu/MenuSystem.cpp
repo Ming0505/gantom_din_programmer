@@ -305,11 +305,9 @@ void MenuSystem::_handleInputSetAddress(int enc_diff, bool short_pressed, bool l
         _ft->_tone(3800, 15); 
     }
 
-    // Short press saves and returns to main menu
+    // Short press saves the address
     if (short_pressed) {
         _saveDmxAddress();
-        _currentState = MAIN_MENU;
-        _mainMenuSelection = 0; 
     }
 }
 
