@@ -236,26 +236,27 @@ void view_create(FactoryTest* ft)
 {
     _ft = ft;
     _ft->_enc.setPosition(_last_enc_postion);
-    _ft->_canvas->setFont(&fonts::efontCN_16);
+    _ft->_canvas->setFont(&fonts::efontCN_24);
     _ft->_canvas->setTextSize(1);
 
     // Create menu
     _launcher_menu = new LauncherMenu;
 
-    // Further narrowed positions for better fit
+    // Selected one
     _launcher_menu->addOption();
-    _launcher_menu->setLastKeyframe({5, 10, 170, 50}); // Main selected option narrower
+    _launcher_menu->setLastKeyframe({6, 6, 228, 64});
 
-    // Adjust waiting line positions for better fit
+    // Waiting line
     for (int i = 0; i < _app_render_props_list_size - 2; i++)
     {
+        // I'm too lazy to use userdata to paas the props
         _launcher_menu->addOption();
-        _launcher_menu->setLastKeyframe({5, 65 + 45 * i, 170, 35}); // Narrower bars
+        _launcher_menu->setLastKeyframe({88 + 65 * i, 81, 58, 44});
     }
 
     // Set the last one next to selected one to smooth the loop
     _launcher_menu->addOption();
-    _launcher_menu->setLastKeyframe({5, 65 + 45 * (_app_render_props_list_size - 2), 170, 35});
+    _launcher_menu->setLastKeyframe({6 + 228 + 24, 6, 58, 44});
 
     // Config
     _launcher_menu->setConfig().renderInterval = 20;
@@ -264,9 +265,9 @@ void view_create(FactoryTest* ft)
     _launcher_menu->setPositionTransitionPath(EasingPath::easeOutBack);
     _launcher_menu->setShapeDuration(400);
 
-    // Create bat voltage panel transition
+    // Create bat va panel transition
     _batv_panel_transition = new Transition2D(-83, 135);
-    _batv_panel_transition->moveTo(5, 5);
+    _batv_panel_transition->moveTo(0, 81);
     _batv_panel_transition->setDelay(300);
     _batv_panel_transition->setDuration(800);
     float bat_v = (float)analogReadMilliVolts(10) * 2 / 1000;

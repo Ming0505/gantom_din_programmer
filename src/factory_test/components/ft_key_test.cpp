@@ -252,10 +252,10 @@ void FactoryTest::_encoder_test()
     printf("encoder test\n");
 
     /* Display */
-    _canvas->fillScreen(TFT_DARKGREY);
+    _canvas->fillScreen(TFT_BLACK);
     _canvas->setFont(&fonts::efontCN_24);
     _canvas->setTextSize(1);
-    _canvas->setTextColor(TFT_YELLOW, TFT_DARKGREY);
+    _canvas->setTextColor(TFT_YELLOW, TFT_BLACK);
 
     _canvas->setCursor(0, 0);
     _canvas->printf(" [编码器测试]\n");
@@ -271,16 +271,16 @@ void FactoryTest::_encoder_test()
 
     for (int i = 0; i < 4; i++)
     {
+
         while (1)
         {
+
             _check_encoder();
 
-            // Clear previous text area before redrawing
-            int textY = 90;
-            _canvas->fillRect(0, textY, _canvas->width(), 60, TFT_DARKGREY);
-            _canvas->setCursor(0, textY);
+            _canvas->setCursor(0, 90);
+            _canvas->setTextColor(TFT_YELLOW, TFT_BLACK);
             _canvas->printf(" > %d    ", target_num_list[i]);
-            _canvas->setTextColor(((target_num_list[i] == _enc_pos) ? TFT_GREEN : TFT_RED), TFT_DARKGREY);
+            _canvas->setTextColor(((target_num_list[i] == _enc_pos) ? TFT_GREEN : TFT_RED), TFT_BLACK);
             _canvas->printf("%d    ", _enc_pos);
 
             if (_check_next())
@@ -295,6 +295,8 @@ void FactoryTest::_encoder_test()
         }
     }
 
+    _canvas->setFont(&fonts::Font0);
+
     printf("quit encoder test\n");
 }
 
@@ -303,11 +305,10 @@ void FactoryTest::_encoder_test_new()
     printf("encoder test\n");
 
     /* Display */
-    _canvas->fillScreen(TFT_DARKGREY);
+    _canvas->fillScreen(TFT_BLACK);
     _canvas->setFont(&fonts::efontCN_24);
     _canvas->setTextSize(1);
-    _canvas->setTextColor(TFT_YELLOW, TFT_DARKGREY);
-    
+    _canvas->setTextColor(TFT_YELLOW, TFT_BLACK);
     _canvas->setCursor(0, 0);
     _canvas->printf(" [编码器测试]\n");
     _canvas->setTextColor(TFT_WHITE);
@@ -321,16 +322,16 @@ void FactoryTest::_encoder_test_new()
 
     for (int i = 0; i < 2; i++)
     {
+
         while (1)
         {
+
             _check_encoder();
 
-            // Clear previous text area before redrawing
-            int textY = 90;
-            _canvas->fillRect(0, textY, _canvas->width(), 60, TFT_DARKGREY);
-            _canvas->setCursor(0, textY);
+            _canvas->setCursor(0, 90);
+            _canvas->setTextColor(TFT_YELLOW, TFT_BLACK);
             _canvas->printf(" > %d    ", target_num_list[i]);
-            _canvas->setTextColor(((abs(_enc_pos) >= 6) ? TFT_GREEN : TFT_RED), TFT_DARKGREY);
+            _canvas->setTextColor(((abs(_enc_pos) >= 6) ? TFT_GREEN : TFT_RED), TFT_BLACK);
             _canvas->printf("%d    ", _enc_pos);
 
             if (abs(_enc_pos) >= 6)
@@ -344,6 +345,7 @@ void FactoryTest::_encoder_test_new()
         }
     }
 
+    _canvas->setFont(&fonts::Font0);
     printf("quit encoder test\n");
 }
 
@@ -360,22 +362,18 @@ void FactoryTest::_encoder_test_user()
 
     while (1)
     {
-        _canvas->fillScreen(TFT_DARKGREY);
+        _canvas->fillScreen((uint32_t)0x6AB8A0);
 
-        // Header bar now on the left side
-        _canvas->fillRect(0, 0, 25, _canvas->height(), (uint32_t)0x163820);
+        _canvas->fillRect(0, 0, 240, 25, (uint32_t)0x163820);
         _canvas->setTextSize(2);
         _canvas->setTextColor((uint32_t)0x6AB8A0);
         snprintf(string_buffer, 20, "Encoder Test");
-        
-        // Draw the header text (no need to set rotation as it's now set globally)
-        _canvas->drawCenterString(string_buffer, _canvas->height() / 2, 5);
+        _canvas->drawCenterString(string_buffer, _canvas->width() / 2, 5);
 
-        // Adjust the encoder value position for the rotated layout
         _canvas->setTextSize(5);
         _canvas->setTextColor((uint32_t)0x163820);
         snprintf(string_buffer, 20, "%d", _enc_pos);
-        _canvas->drawCenterString(string_buffer, (_canvas->width() + 25) / 2, _canvas->height() / 2);
+        _canvas->drawCenterString(string_buffer, _canvas->width() / 2, 55);
 
         _canvas_update();
 

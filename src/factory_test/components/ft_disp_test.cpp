@@ -15,11 +15,10 @@ void FactoryTest::_disp_init()
 {
     _disp = new LGFX_DinMeter;
     _disp->init();
-    _disp->setRotation(1);
+    _disp->setRotation(3);
 
     _canvas = new LGFX_Sprite(_disp);
     _canvas->createSprite(_disp->width(), _disp->height());
-    _canvas->setRotation(1);
 
     // _disp->fillScreen(TFT_RED);
     // _disp->setTextColor(TFT_WHITE);
