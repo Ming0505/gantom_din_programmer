@@ -9,14 +9,16 @@
  *
  */
 #include "factory_test/factory_test.h"
-#include "view/gantom_ui.h"
 
 static FactoryTest ft;
+
+void programmer_view_create(FactoryTest* ft);
+void programmer_view_update();
 
 void setup()
 {
     ft.init();
-    gantom_ui_create(&ft);
+    programmer_view_create(&ft);
 }
 
-void loop() { gantom_ui_update(); }
+void loop() { programmer_view_update(); }
