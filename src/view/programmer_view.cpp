@@ -10,17 +10,21 @@
  */
 #include "../factory_test/factory_test.h"
 #include "../programmer/pm_dmx_address.h"
+#include "../programmer/pm_DMX.h"
 #include "assets/assets.h"
 #include <Arduino.h>
 #include <smooth_ui_toolkit.h>
 
 
 static FactoryTest* _ft = nullptr;
+static pm_DMX* pm_dmx = nullptr;
 
 using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 
+void pm_staticlookMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_staticlookMenu_task(FactoryTest* ft);
+void pm_dmxaddressMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_dmxaddressMenu_task(FactoryTest* ft);
 struct AppOptionRenderProps_t
 {
@@ -256,6 +260,10 @@ void programmer_view_create(FactoryTest* ft)
     _launcher_menu->setPositionTransitionPath(EasingPath::easeOutBack);
     _launcher_menu->setShapeDuration(400);
 
+    pm_dmx = new pm_DMX();
+    pm_dmx->init();
+    pm_staticlookMenu_set_pmdmxptr(pm_dmx);
+    pm_dmxaddressMenu_set_pmdmxptr(pm_dmx);
 }
 
 void programmer_view_update()
@@ -271,3 +279,4 @@ void programmer_view_update()
     //    _batv_time_count = millis();
     //}
 }
+

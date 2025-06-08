@@ -9,6 +9,7 @@
  *
  */
 #include "../factory_test/factory_test.h"
+#include "pm_DMX.h"
 #include <Arduino.h>
 #include <smooth_ui_toolkit.h>
 #include <string.h>
@@ -17,7 +18,7 @@ using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 
 enum Button_state {No_active, Short_pressed, Long_pressed, Double_clicked};
-
+static pm_DMX* _pm_dmx = nullptr;
 struct progressBarRenderProps_t
 {
     std::uint32_t theme_color;
@@ -100,6 +101,7 @@ class PM_StaticLookMenu : public SmoothOptions
             if (currentValue < 0) currentValue = 0;
             if (currentValue > 255) currentValue = 255;
             
+            _pm_dmx->write(_matching_index,currentValue);
             _dmx_channel_val_render_props_list[_matching_index].progress = currentValue;
         }
         
@@ -108,6 +110,7 @@ class PM_StaticLookMenu : public SmoothOptions
     void onRender() override
     {
         // Clear
+        _ft->_canvas->fillScreen(TFT_WHITE);
         _ft->_canvas->fillScreen(0x87C38F);
 
         _ft->_canvas->setTextDatum(top_center);
@@ -169,6 +172,9 @@ class PM_StaticLookMenu : public SmoothOptions
                 String s = String((int)(_dmx_channel_val_render_props_list[_matching_index].progress));
                 _ft->_canvas->drawString(s, 200, 40);
             }
+
+            _ft->_canvas->drawNumber(Serial1.availableForWrite(),30,100);
+
         }
 
         // Push
@@ -210,7 +216,7 @@ public:
 };
 
 static PM_StaticLookMenu* _launcher_menu = nullptr;
-
+unsigned long _dmxTime = 0;
 void pm_staticlookMenu_task(FactoryTest* ft)
 {
     
@@ -247,6 +253,9 @@ void pm_staticlookMenu_task(FactoryTest* ft)
     _launcher_menu->setShapeDuration(400);
     while(1)
     {
+        //digitalWrite(GPIO_NUM_15, HIGH);
+       _pm_dmx->update();
+        //digitalWrite(GPIO_NUM_15, LOW);
         _launcher_menu->update(millis());
         if(!_launcher_menu->get_active()){
             delete _launcher_menu;
@@ -299,4 +308,9 @@ Button_state button_check(FactoryTest* ft)
         }
     }
     return No_active;
+}
+
+void pm_staticlookMenu_set_pmdmxptr(pm_DMX* pm_dmx)
+{
+    _pm_dmx = pm_dmx;
 }

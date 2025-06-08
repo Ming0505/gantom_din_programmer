@@ -9,6 +9,7 @@
  *
  */
 #include "../factory_test/factory_test.h"
+#include "pm_DMX.h"
 #include <Arduino.h>
 #include <smooth_ui_toolkit.h>
 #include <string.h>
@@ -17,6 +18,9 @@ using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 
 enum Button_state {No_active, Short_pressed, Long_pressed, Double_clicked};
+
+
+static pm_DMX* _pm_dmx = nullptr;
 
 constexpr int _dmx_channel_val_render_props_list_size = 5;
 static int _last_enc_postion = 0;
@@ -31,11 +35,6 @@ class PM_DmxaddressMenu : public SmoothSelector
     bool _state = false; //progress bar selected state false->unselected , true->selected
     bool _isActive = false;
     FactoryTest* _ft = nullptr;
-    struct OptionProps_t
-            {
-                Vector4D_t keyframe;
-                void* userData = nullptr;
-            };
     void onReadInput() override
     {
         if (isOpening())
@@ -50,6 +49,10 @@ class PM_DmxaddressMenu : public SmoothSelector
             case Short_pressed:
                 if(getSelectedOptionIdx()!=4){
                     _state=!_state;
+                }else
+                {
+                    //send dmx address set cmd
+                    _pm_dmx->writeAddress(DMX_Address_val);
                 }
             break;
             case Long_pressed:
@@ -274,11 +277,7 @@ void pm_dmxaddressMenu_task(FactoryTest* ft)
         opt[i].userData = nullptr;
         _launcher_menu->addOption(opt[i]);
     }
-   // _launcher_menu->addOption({{85,        45, 30, 40}, nullptr});
-   // _launcher_menu->addOption({{85 + 45*1, 45, 30, 40}, nullptr});
-   // _launcher_menu->addOption({{85 + 45*2, 45, 30, 40}, nullptr});
-   // _launcher_menu->addOption({{85       , 45,120, 40}, nullptr});
-   // _launcher_menu->addOption({{105      ,100, 50, 30}, nullptr});
+
 
     while(1)
     {
@@ -288,4 +287,9 @@ void pm_dmxaddressMenu_task(FactoryTest* ft)
             break;
         }
     }
+}
+
+void pm_dmxaddressMenu_set_pmdmxptr(pm_DMX* pm_dmx)
+{
+    _pm_dmx = pm_dmx;
 }
