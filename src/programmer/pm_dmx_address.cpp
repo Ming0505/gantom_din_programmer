@@ -18,7 +18,7 @@ using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 
 enum Button_state {No_active, Short_pressed, Long_pressed, Double_clicked};
-
+void nvs_save_dmxaddress(void);
 
 static pm_DMX* _pm_dmx = nullptr;
 
@@ -27,6 +27,8 @@ static int _last_enc_postion = 0;
 
 Button_state button_check(FactoryTest* ft);
 int DMX_Address_val = 0;
+static int show_massage_timout = 0;
+static int show_massage1_timout = 0;
 class PM_DmxaddressMenu : public SmoothSelector
 {
     bool _wait_button_released = false;
@@ -52,6 +54,7 @@ class PM_DmxaddressMenu : public SmoothSelector
                 }else
                 {
                     //send dmx address set cmd
+                    show_massage_timout=millis();
                     _pm_dmx->writeAddress(DMX_Address_val);
                 }
             break;
@@ -60,6 +63,8 @@ class PM_DmxaddressMenu : public SmoothSelector
                 _isActive = false;
             break;
             case Double_clicked:
+                show_massage1_timout=millis();
+                nvs_save_dmxaddress();
             break;
             default:
             break;
@@ -146,7 +151,7 @@ class PM_DmxaddressMenu : public SmoothSelector
     {
         // Clear
         _ft->_canvas->fillScreen(TFT_WHITE);
-
+        _ft->_canvas->setTextSize(1);
         _ft->_canvas->setTextDatum(top_center);
         _ft->_canvas->setTextColor(0x000000);
         _ft->_canvas->drawCentreString("DMX Address",120, 5);
@@ -201,7 +206,20 @@ class PM_DmxaddressMenu : public SmoothSelector
         _ft->_canvas->drawRoundRect(
             getSelectorCurrentFrame().x, getSelectorCurrentFrame().y, getSelectorCurrentFrame().w, getSelectorCurrentFrame().h,5);
 
-
+        // Render notific message
+        if(millis() - show_massage_timout <2000)
+        {
+            _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
+            _ft->_canvas->setTextColor(TFT_BLACK);
+            _ft->_canvas->setTextSize(0.8);
+            _ft->_canvas->drawCentreString("apply successed",120, 62);
+        }else if(millis() - show_massage1_timout <2000)
+        {
+            _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
+            _ft->_canvas->setTextColor(TFT_BLACK);
+            _ft->_canvas->setTextSize(0.8);
+            _ft->_canvas->drawCentreString("save successed",120, 62);
+        }
 
         // Push
         _ft->_canvas_update();

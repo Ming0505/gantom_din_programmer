@@ -26,6 +26,8 @@ void pm_staticlookMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_staticlookMenu_task(FactoryTest* ft);
 void pm_dmxaddressMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_dmxaddressMenu_task(FactoryTest* ft);
+void pm_settingsMenu_task(FactoryTest* ft);
+void pm_dmx_settingsMenu_task(FactoryTest* ft);
 struct AppOptionRenderProps_t
 {
     std::uint32_t theme_color;
@@ -37,8 +39,8 @@ constexpr int _app_render_props_list_size = 4;
 constexpr AppOptionRenderProps_t _app_render_props_list[] = {
     {0xB8DBD9, 0x385B59, "DMX ADDRESS", image_data_icon_display},
     {0x87C38F, 0x07430F, "STATIC LOOK", image_data_icon_brightness},
-    {0xC9C9EE, 0x49496E, "FLASH BOOT", image_data_icon_rtc},
-    {0xCEDBB8, 0x4E5B38, "POWER OFF", image_data_icon_poweroff},
+    {0xC9C9EE, 0x49496E, "SETTINGS", image_data_icon_rtc},
+    {0xCEDBB8, 0x4E5B38, "DMX SETTINGS", image_data_icon_poweroff},
 };
 
 static Transition2D* _batv_panel_transition = nullptr;
@@ -217,9 +219,9 @@ class LauncherMenu : public SmoothOptions
         else if (matching_index == 1)
             pm_staticlookMenu_task(_ft);
         else if (matching_index == 2)
-            _ft->_rtc_test();
+            pm_settingsMenu_task(_ft);
         else if (matching_index == 3)
-            _ft->_wifi_test();
+            pm_dmx_settingsMenu_task(_ft);
         else if (matching_index == 4)
             _ft->_power_off();
     }

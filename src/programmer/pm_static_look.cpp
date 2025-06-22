@@ -13,7 +13,10 @@
 #include <Arduino.h>
 #include <smooth_ui_toolkit.h>
 #include <string.h>
-
+void nvs_save_dmxdata(void);
+extern int _start_ch ;
+extern int _max_ch;
+extern uint8_t dmxData[512];
 using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 
@@ -29,17 +32,20 @@ struct progressBarRenderProps_t
 
 constexpr int _dmx_channel_val_render_props_list_size = 8;
 progressBarRenderProps_t _dmx_channel_val_render_props_list[] = {
-    {0x88898A,   0.0f, 255.0f, "CH1"},
-    {0x88898A,  50.0f, 255.0f, "CH2"},
-    {0x88898A,  90.0f, 255.0f, "CH3"},
-    {0x88898A, 100.0f, 255.0f, "CH4"},
-    {0x88898A, 100.0f, 255.0f, "CH5"},
-    {0x88898A, 100.0f, 255.0f, "CH6"},
-    {0x88898A, 100.0f, 255.0f, "CH7"},
-    {0x88898A, 100.0f, 255.0f, "CH8"},
+    {0x88898A,   0.0f, 255.0f, "CH"},
+    {0x88898A,  50.0f, 255.0f, "CH"},
+    {0x88898A,  90.0f, 255.0f, "CH"},
+    {0x88898A, 100.0f, 255.0f, "CH"},
+    {0x88898A, 100.0f, 255.0f, "CH"},
+    {0x88898A, 100.0f, 255.0f, "CH"},
+    {0x88898A, 100.0f, 255.0f, "CH"},
+    {0x88898A, 100.0f, 255.0f, "CH"},
 };
 
+extern int _start_ch;
 static int _last_enc_postion = 0;
+static bool show_massage = false;
+static int show_massage_timout = 0;
 Button_state button_check(FactoryTest* ft);
 class PM_StaticLookMenu : public SmoothOptions
 {
@@ -68,6 +74,8 @@ class PM_StaticLookMenu : public SmoothOptions
                 _isActive = false;
             break;
             case Double_clicked:
+                show_massage_timout = millis();
+                nvs_save_dmxdata();
             break;
             default:
             break;
@@ -112,7 +120,7 @@ class PM_StaticLookMenu : public SmoothOptions
         // Clear
         _ft->_canvas->fillScreen(TFT_WHITE);
         _ft->_canvas->fillScreen(0x87C38F);
-
+        _ft->_canvas->setTextSize(1);
         _ft->_canvas->setTextDatum(top_center);
         _ft->_canvas->setTextColor(0x000000);
         _ft->_canvas->drawCentreString("Static Look",120, 5);
@@ -147,7 +155,8 @@ class PM_StaticLookMenu : public SmoothOptions
             int tag_y=getOptionCurrentFrame(_matching_index).y;
  
             _ft->_canvas->setTextColor(0x000000);
-            _ft->_canvas->drawString(_dmx_channel_val_render_props_list[_matching_index].tag,\
+            String tag_str = _dmx_channel_val_render_props_list[_matching_index].tag + String((int)(_matching_index+_start_ch));
+            _ft->_canvas->drawString(tag_str,\
              tag_x, tag_y);
 
             // Render unselected bar
@@ -173,7 +182,14 @@ class PM_StaticLookMenu : public SmoothOptions
                 _ft->_canvas->drawString(s, 200, 40);
             }
 
-            _ft->_canvas->drawNumber(Serial1.availableForWrite(),30,100);
+            // Render notific message
+            if(millis() - show_massage_timout <2000)
+            {
+                _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
+                _ft->_canvas->setTextColor(TFT_BLACK);
+                _ft->_canvas->setTextSize(0.8);
+                _ft->_canvas->drawCentreString("save successed",120, 62);
+            }
 
         }
 
@@ -251,11 +267,17 @@ void pm_staticlookMenu_task(FactoryTest* ft)
     _launcher_menu->setPositionDuration(600);
     _launcher_menu->setPositionTransitionPath(EasingPath::easeOutBack);
     _launcher_menu->setShapeDuration(400);
+
+    
+    for(uint8_t i=0;i<8;i++)
+    {
+        _dmx_channel_val_render_props_list[i].progress=(float)dmxData[_start_ch+i];
+    }
     while(1)
     {
-        //digitalWrite(GPIO_NUM_15, HIGH);
+        digitalWrite(GPIO_NUM_15, HIGH);
        _pm_dmx->update();
-        //digitalWrite(GPIO_NUM_15, LOW);
+        digitalWrite(GPIO_NUM_15, LOW);
         _launcher_menu->update(millis());
         if(!_launcher_menu->get_active()){
             delete _launcher_menu;
@@ -269,6 +291,8 @@ bool _isPressing = false;
 unsigned long _pressStartTime = 0;
  // For checking button double click
 unsigned long _lastClickTime = 0;
+unsigned long _doubleClickTime = 0;
+bool _first_click = false;
 Button_state button_check(FactoryTest* ft)
 {
     // Handle button press using the factory test's button
@@ -282,6 +306,7 @@ Button_state button_check(FactoryTest* ft)
         if(pressDuration > 1200){
             // Long press - exit menu
             ft->_tone(1200, 100);
+            _first_click = false;
             return Long_pressed;
         }
     } else if (_isPressing) {
@@ -292,19 +317,34 @@ Button_state button_check(FactoryTest* ft)
         if (pressDuration > 800) {
             // Long press - exit menu
             ft->_tone(1200, 100);
+            _first_click = false;
             return Long_pressed;
+        }else if(pressDuration > 500){
+            //click detected 
+                ft->_tone(2500, 50);
+                _first_click = false;
+                return Short_pressed;
         }else {
             // Check for double click based on timing
-            if (millis() - _lastClickTime < 300) {
-                // Double-click detected
-                ft->_tone(2000, 50);
-                return Double_clicked;
-            } else {
-                //click detected 
-                ft->_tone(2500, 50);
+            if(_first_click){
+                if (millis() - _lastClickTime < 300) {
+                    // Double-click detected
+                    _first_click = false;
+                    ft->_tone(2000, 50);
+                    return Double_clicked;
+                }
+            }else {
                 _lastClickTime = millis();
-                return Short_pressed;
+                _doubleClickTime = millis();
+                _first_click=true;
             }
+        }
+    }else if(_first_click){
+        if (millis() - _doubleClickTime > 300) {
+            // Double-click detected timout
+            ft->_tone(2500, 50);
+            _first_click = false;
+            return Short_pressed;
         }
     }
     return No_active;

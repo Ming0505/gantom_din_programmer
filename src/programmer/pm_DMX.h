@@ -15,7 +15,7 @@
 
 class pm_DMX 
 {
-    uint8_t dmxData[dmxMaxChannel] = {};
+    
     bool _dmx_init = false;
     int chanSize =10;
     
@@ -24,6 +24,9 @@ public:
   uint8_t read(int Channel);
   void write(int channel, uint8_t value);
   void writeAddress(int address);
+  void write_toggle_Silent_Boot(void);
+  void write_LOCK_9600_baud(void);
+  void write_UNLOCK_9600_baud(void);
   void update(/*bool DMX_mode*/);
   void end();
 };
