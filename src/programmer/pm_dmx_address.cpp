@@ -16,7 +16,7 @@
 
 using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
-
+extern uint32_t change_speed;
 enum Button_state {No_active, Short_pressed, Long_pressed, Double_clicked};
 void nvs_save_dmxaddress(void);
 
@@ -137,6 +137,19 @@ class PM_DmxaddressMenu : public SmoothSelector
                     if(DMX_Address_val>511)DMX_Address_val=511;
                 break;
                 case 3:
+                    if(change != 0){
+                        int32_t delt_val = millis()-change_speed;
+                        if(delt_val<=500)
+                        {
+                            if(change>0){
+                                change = 20 - (delt_val/25);
+                            }
+                            else{
+                                change = (delt_val/25)-20;
+                            }
+                        }
+                        change_speed = millis();
+                    }
                     temp_val = DMX_Address_val + change;
                     if(temp_val>511)temp_val=511;
                     else if(temp_val<0)temp_val=0;
@@ -268,7 +281,7 @@ SmoothUIToolKit::Vector4D_t vect_opt[]={
     {60       , 45,120, 40},
     {85       , 95, 70, 30},
 };
-
+uint32_t time_address=0;
 void pm_dmxaddressMenu_task(FactoryTest* ft)
 {
     ft->_enc.setPosition(_last_enc_postion);
@@ -295,7 +308,7 @@ void pm_dmxaddressMenu_task(FactoryTest* ft)
         opt[i].userData = nullptr;
         _launcher_menu->addOption(opt[i]);
     }
-
+    _launcher_menu->moveTo(3);
 
     while(1)
     {
@@ -303,6 +316,11 @@ void pm_dmxaddressMenu_task(FactoryTest* ft)
         if(!_launcher_menu->get_active()){
             delete _launcher_menu;
             break;
+        }
+        if (millis() - time_address > 100)
+        {
+         _pm_dmx->keep_alive();
+         time_address = millis();
         }
     }
 }

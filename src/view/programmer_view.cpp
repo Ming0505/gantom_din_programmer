@@ -35,12 +35,12 @@ struct AppOptionRenderProps_t
     const char* tag;
     const std::uint16_t* icon;
 };
-constexpr int _app_render_props_list_size = 4;
+constexpr int _app_render_props_list_size = 3;
 constexpr AppOptionRenderProps_t _app_render_props_list[] = {
     {0xB8DBD9, 0x385B59, "DMX ADDRESS", image_data_icon_display},
     {0x87C38F, 0x07430F, "STATIC LOOK", image_data_icon_brightness},
     {0xC9C9EE, 0x49496E, "SETTINGS", image_data_icon_rtc},
-    {0xCEDBB8, 0x4E5B38, "DMX SETTINGS", image_data_icon_poweroff},
+    //{0xCEDBB8, 0x4E5B38, "DMX SETTINGS", image_data_icon_poweroff},
 };
 
 static Transition2D* _batv_panel_transition = nullptr;
@@ -274,11 +274,10 @@ void programmer_view_update()
     //_batv_panel_transition->update(millis());
 
     // Read bat voltage
-    //if (millis() - _batv_time_count > 3000)
-    //{
-    //    float bat_v = (float)analogReadMilliVolts(10) * 2 / 1000;
-    //    snprintf(_batv, 10, "%.1fV", bat_v);
-    //    _batv_time_count = millis();
-    //}
+    if (millis() - _batv_time_count > 100)
+    {
+        pm_dmx->keep_alive();
+        _batv_time_count = millis();
+    }
 }
 

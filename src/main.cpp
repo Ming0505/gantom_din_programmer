@@ -19,6 +19,7 @@ void setup()
 {
     ft.init();
     pinMode(GPIO_NUM_15, OUTPUT); // motor
+    pinMode(GPIO_NUM_13, OUTPUT); // motor
     programmer_view_create(&ft);
     init_nvs_settings();
 }

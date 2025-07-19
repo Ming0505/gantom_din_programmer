@@ -47,6 +47,7 @@ static int _last_enc_postion = 0;
 static bool show_massage = false;
 static int show_massage_timout = 0;
 Button_state button_check(FactoryTest* ft);
+uint32_t change_speed=0;
 class PM_StaticLookMenu : public SmoothOptions
 {
     bool _wait_button_released = false;
@@ -98,10 +99,23 @@ class PM_StaticLookMenu : public SmoothOptions
         else
         {
             // Value adjustment mode
-            uint32_t currentValue = _dmx_channel_val_render_props_list[_matching_index].progress;
+            int32_t currentValue = _dmx_channel_val_render_props_list[_matching_index].progress;
             
             // Apply faster value changing for smoother user experience
-            uint32_t change = newPos - _last_enc_postion;
+            int32_t change = newPos - _last_enc_postion;
+            if(change != 0){
+                int32_t delt_val = millis()-change_speed;
+                if(delt_val<=500)
+                {
+                    if(change>0){
+                        change = 20 - (delt_val/25);
+                    }
+                    else{
+                        change = (delt_val/25)-20;
+                    }
+                }
+                change_speed = millis();
+            }
             currentValue += change;
             _last_enc_postion = newPos;
             
@@ -233,6 +247,7 @@ public:
 
 static PM_StaticLookMenu* _launcher_menu = nullptr;
 unsigned long _dmxTime = 0;
+uint32_t time_static_look = 0;
 void pm_staticlookMenu_task(FactoryTest* ft)
 {
     
@@ -275,9 +290,12 @@ void pm_staticlookMenu_task(FactoryTest* ft)
     }
     while(1)
     {
-        digitalWrite(GPIO_NUM_15, HIGH);
        _pm_dmx->update();
-        digitalWrite(GPIO_NUM_15, LOW);
+       if (millis() - time_static_look > 100)
+        {
+        _pm_dmx->keep_alive();
+        time_static_look = millis();
+        }
         _launcher_menu->update(millis());
         if(!_launcher_menu->get_active()){
             delete _launcher_menu;

@@ -158,7 +158,7 @@ SmoothUIToolKit::Vector4D_t setting_vect_opt[]={
     {20,  70, 200, 27},
     {20, 100, 200, 27},
 };
-
+uint32_t time_settings = 0;
 void pm_settingsMenu_task(FactoryTest* ft)
 {
     ft->_enc.setPosition(_last_enc_postion);
@@ -193,6 +193,11 @@ void pm_settingsMenu_task(FactoryTest* ft)
         if(!_launcher_menu->get_active()){
             delete _launcher_menu;
             break;
+        }
+        if (millis() - time_settings > 100)
+        {
+         _pm_dmx->keep_alive();
+         time_settings = millis();
         }
     }
 }

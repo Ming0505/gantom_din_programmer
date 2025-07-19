@@ -4,9 +4,9 @@
 
 
 #define DMX_baud_rate           9600 // DMXSPEED
-#define DMX_serial_config       SERIAL_8N2 //æ•°æ®ä½8 æ— æ ¡éªŒ 2åœæ­¢
+#define DMX_serial_config       SERIAL_8N2 //æ•°æÿ®ä½ÿ8 æ— æ ¡éÿÿ 2åÿÿæ­¢
 #define DMX_break_speed         3200 //BREAKSPEED
-#define DMX_break_serial_config SERIAL_8N1 //æ•°æ®ä½8 æ— æ ¡éªŒ 1åœæ­¢
+#define DMX_break_serial_config SERIAL_8N1 //æ•°æÿ®ä½ÿ8 æ— æ ¡éÿÿ 1åÿÿæ­¢
 #define DMX_sendPin             GPIO_NUM_2 //dafault on ESP8266
 #define DMX_revicePin           GPIO_NUM_1
 
@@ -27,6 +27,7 @@ public:
   void write_toggle_Silent_Boot(void);
   void write_LOCK_9600_baud(void);
   void write_UNLOCK_9600_baud(void);
+  void keep_alive(void);
   void update(/*bool DMX_mode*/);
   void end();
 };
