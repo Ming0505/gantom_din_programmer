@@ -28,19 +28,21 @@ void pm_dmxaddressMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_dmxaddressMenu_task(FactoryTest* ft);
 void pm_settingsMenu_task(FactoryTest* ft);
 void pm_dmx_settingsMenu_task(FactoryTest* ft);
+void init_button_check();
 struct AppOptionRenderProps_t
 {
     std::uint32_t theme_color;
     std::uint32_t tag_color;
     const char* tag;
-    const std::uint16_t* icon;
+    const char* tag_string;
 };
-constexpr int _app_render_props_list_size = 3;
+constexpr int _app_render_props_list_size = 4;
 constexpr AppOptionRenderProps_t _app_render_props_list[] = {
-    {0xB8DBD9, 0x385B59, "DMX ADDRESS", image_data_icon_display},
-    {0x87C38F, 0x07430F, "STATIC LOOK", image_data_icon_brightness},
-    {0xC9C9EE, 0x49496E, "SETTINGS", image_data_icon_rtc},
-    //{0xCEDBB8, 0x4E5B38, "DMX SETTINGS", image_data_icon_poweroff},
+    {0xB8DBD9, 0x385B59, "SET DMX ADDRESS", "SET.."},
+    {0x87C38F, 0x07430F, "SET DMX OUTPUT", "SET.."},
+    {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
+    {0xFFFF00, 0x49496E, "RESET", "RES.."},
+    {0xCEDBB8, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
 };
 
 static Transition2D* _batv_panel_transition = nullptr;
@@ -48,11 +50,12 @@ static std::uint32_t _batv_time_count = 0;
 static char _batv[10] = {0};
 static int _last_enc_postion = 0;
 static bool _is_just_boot_in = true;
-
+uint32_t reset_success_count=0;
 class LauncherMenu : public SmoothOptions
 {
     bool _wait_button_released = false;
     bool _is_pressing = false;
+    bool _app_close_flag = false;
     int _matching_index = 0;
 
     void onReadInput() override
@@ -74,9 +77,6 @@ class LauncherMenu : public SmoothOptions
             }
 
             _last_enc_postion = _ft->_enc.getPosition();
-            // printf("%d\n", _last_enc_postion);
-            // printf("%d\n", (int)_ft->_enc.getPosition());
-            // printf("%d\n", _ft->_enc.getCount());
         }
 
         // If just boot in, lock until button released
@@ -92,7 +92,7 @@ class LauncherMenu : public SmoothOptions
         // If select
         else if (!_ft->_btn_pwr.read())
         {
-            if (!_wait_button_released)
+            if (!_wait_button_released && !_app_close_flag)
             {
                 _ft->_tone(2500, 50);
 
@@ -107,6 +107,10 @@ class LauncherMenu : public SmoothOptions
         // Unlock if no button is pressing
         else
         {
+            if(_app_close_flag){
+                _app_close_flag = false;
+                return;
+            }
             _wait_button_released = false;
             if (_is_pressing)
             {
@@ -158,12 +162,20 @@ class LauncherMenu : public SmoothOptions
                 }
                 else
                     y_offset = getOptionCurrentFrame(_matching_index).y + 6;
-
-                _ft->_canvas->pushImage(getOptionCurrentFrame(_matching_index).x + 13,
-                                        y_offset,
-                                        32,
-                                        32,
-                                        _app_render_props_list[_matching_index].icon);
+                if(i!=0)
+                {
+                    _ft->_canvas->setTextSize(0.7);
+                    _ft->_canvas->drawString(_app_render_props_list[_matching_index].tag_string,
+                                        getOptionCurrentFrame(_matching_index).x + 45,
+                                        y_offset+7);
+                    _ft->_canvas->setTextSize(1);
+                }
+                
+                //_ft->_canvas->pushImage(getOptionCurrentFrame(_matching_index).x + 13,
+                //                        y_offset,
+                //                        32,
+                //                        32,
+                //                        _app_render_props_list[_matching_index].icon);
                 // spdlog::info("{} {}", std::abs(getOptionCurrentFrame(_matching_index).y - getKeyframe(0).y), y_offset);
             }
 
@@ -173,6 +185,12 @@ class LauncherMenu : public SmoothOptions
                 _ft->_canvas->setTextColor(_app_render_props_list[_matching_index].tag_color);
                 _ft->_canvas->drawString(_app_render_props_list[_matching_index].tag, 218, 26);
             }
+        }
+        if(millis() - reset_success_count<800)
+        {
+            _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
+            _ft->_canvas->setTextColor(TFT_BLACK);
+            _ft->_canvas->drawCentreString("RESET SUCCESSED", 120, 63);
         }
 
         // Push
@@ -205,6 +223,7 @@ class LauncherMenu : public SmoothOptions
         setShapeDuration(400);
 
         // Close option
+        printf("close app\n");
         close();
         _ft->_enc.setPosition(_last_enc_postion);
         _ft->_canvas->setFont(&fonts::efontCN_24);
@@ -214,16 +233,34 @@ class LauncherMenu : public SmoothOptions
     void _open_app()
     {
         int matching_index = getSelectedOptionIndex();
-        if (matching_index == 0)
-             pm_dmxaddressMenu_task(_ft);
-        else if (matching_index == 1)
+        printf("open app\n");
+        if (matching_index == 0){
+            printf("open app 0\n");
+            pm_dmxaddressMenu_task(_ft);
+        }  
+        else if (matching_index == 1){
+            printf("open app 1\n");
             pm_staticlookMenu_task(_ft);
+        }
         else if (matching_index == 2)
-            pm_settingsMenu_task(_ft);
+        {
+            //pm_settingsMenu_task(_ft);
+            _ft->_power_off();
+            esp_restart();
+        }  
         else if (matching_index == 3)
-            pm_dmx_settingsMenu_task(_ft);
+        {
+            //pm_dmx_settingsMenu_task(_ft);
+            pm_dmx->writeAddress(1);
+            reset_success_count = millis();
+
+        }
         else if (matching_index == 4)
             _ft->_power_off();
+        //_wait_button_released = true;
+        //_is_pressing = true;
+        init_button_check();
+        _app_close_flag = true;
     }
 };
 

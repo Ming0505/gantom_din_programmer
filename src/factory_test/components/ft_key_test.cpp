@@ -20,6 +20,7 @@ void FactoryTest::_power_on()
 
 void FactoryTest::_power_off()
 {
+    uint32_t power_on_cnt = 0;
     _rtc.clearIRQ();
     _rtc.disableIRQ();
 
@@ -38,7 +39,16 @@ void FactoryTest::_power_off()
 
     while (1)
     {
-        delay(1000);
+        if(!_btn_pwr.read())
+        {
+            power_on_cnt++;
+        }else{
+            power_on_cnt=0;
+        }
+        if(power_on_cnt>2000){
+            break;
+        }
+        delay(1);
     }
 }
 
@@ -110,7 +120,7 @@ bool FactoryTest::_check_test_mode()
             _canvas->setTextSize(1);
             _canvas->setFont(&fonts::efontCN_24);
             _canvas->setCursor(0, 10);
-            _canvas->printf("[DinMeter] 测试固件\n%s (%s)\n\n松开按键进入测试模式", FW_VERISON, __DATE__);
+            _canvas->printf("[DinMeter] 测试固件\n%s (%s)\n\n���开���键进入测试模��", FW_VERISON, __DATE__);
             _canvas_update();
 
             while (!_btn_pwr.read())
@@ -258,9 +268,9 @@ void FactoryTest::_encoder_test()
     _canvas->setTextColor(TFT_YELLOW, TFT_BLACK);
 
     _canvas->setCursor(0, 0);
-    _canvas->printf(" [编码器测试]\n");
+    _canvas->printf(" [编��器测试]\n");
     _canvas->setTextColor(TFT_WHITE);
-    _canvas->printf(" 转到左边数字\n 然后按下按钮\n");
+    _canvas->printf(" 转���左边数字\n 然������下���钮\n");
 
     _canvas->setTextSize(1.5);
 
@@ -310,9 +320,9 @@ void FactoryTest::_encoder_test_new()
     _canvas->setTextSize(1);
     _canvas->setTextColor(TFT_YELLOW, TFT_BLACK);
     _canvas->setCursor(0, 0);
-    _canvas->printf(" [编码器测试]\n");
+    _canvas->printf(" [编��器测试]\n");
     _canvas->setTextColor(TFT_WHITE);
-    _canvas->printf(" 转到左边数字\n");
+    _canvas->printf(" 转���左边数字\n");
     _canvas->setTextSize(1.5);
 
     _enc_pos = 0;
