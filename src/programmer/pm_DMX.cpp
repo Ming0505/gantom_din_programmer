@@ -78,7 +78,7 @@ uint8_t KeepAlive[10] = {0x91, 0x20, 0x11, 1, 1, 1, 1, 1, 1, 0};
 void pm_DMX::writeAddress(int address)
     {
         uint8_t check_sum=0;
-        if(address<0 || address>511)address=0;
+        if(address<1 || address>512)address=1;
         Address[4] = (address>>8) & 0Xff;
         Address[7] = (address>>8) & 0Xff;
         Address[5] = address & 0Xff;
