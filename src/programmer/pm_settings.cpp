@@ -88,7 +88,7 @@ class PM_SettingsMenu : public SmoothSelector
         _ft->_canvas->setTextDatum(top_center);
         _ft->_canvas->setTextColor(0x000000);
         _ft->_canvas->setTextSize(1);
-        _ft->_canvas->drawCentreString("Settings",120, 5);
+        _ft->_canvas->drawCentreString("SILENT BOOTUP TOGGLE",120, 5);
         // Redner options
         int index = 0;
         _ft->_canvas->setColor(TFT_BLUE);

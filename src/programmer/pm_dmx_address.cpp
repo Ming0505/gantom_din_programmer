@@ -17,6 +17,7 @@
 using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 extern uint32_t change_speed;
+extern uint32_t auto_change_time;
 enum Button_state {No_active, Short_pressed, Long_pressed, Double_clicked};
 void nvs_save_dmxaddress(void);
 
@@ -26,16 +27,19 @@ constexpr int _dmx_channel_val_render_props_list_size = 5;
 static int _last_enc_postion = 0;
 
 Button_state button_check(FactoryTest* ft);
+void init_button_check();
 int DMX_Address_val = 0;
 static int show_massage_timout = 0;
 static int show_massage1_timout = 0;
+static int add_speed = 0;
+static int auto_change = 0;
 class PM_DmxaddressMenu : public SmoothSelector
 {
     bool _wait_button_released = false;
     bool _is_pressing = false;
     int _matching_index = 0;
     bool _state = false; //progress bar selected state false->unselected , true->selected
-    bool _isActive = false;
+    bool _isActive = true;
     FactoryTest* _ft = nullptr;
     void onReadInput() override
     {
@@ -95,6 +99,7 @@ class PM_DmxaddressMenu : public SmoothSelector
             switch(getSelectedOptionIdx())
             {
                 case 0:
+                    auto_change=0;
                     temp_val = val_100+change;
                     if(temp_val>5)
                     {
@@ -109,6 +114,7 @@ class PM_DmxaddressMenu : public SmoothSelector
                     DMX_Address_val = val_100*100 + val_10*10 + val_1;
                 break;
                 case 1:
+                    auto_change=0;
                     temp_val = val_10+change;
                     if(temp_val>9)
                     {
@@ -123,6 +129,7 @@ class PM_DmxaddressMenu : public SmoothSelector
                     DMX_Address_val = val_100*100 + val_10*10 + val_1;
                 break;
                 case 2:
+                    auto_change=0;
                     temp_val = val_1+change;
                     if(temp_val>9)
                     {
@@ -134,25 +141,46 @@ class PM_DmxaddressMenu : public SmoothSelector
                         val_1 = temp_val;
                     }
                     DMX_Address_val = val_100*100 + val_10*10 + val_1;
-                    if(DMX_Address_val>511)DMX_Address_val=511;
+                    if(DMX_Address_val>512)DMX_Address_val=512;
                 break;
                 case 3:
                     if(change != 0){
                         int32_t delt_val = millis()-change_speed;
-                        if(delt_val<=500)
+                        if(delt_val<=80)
                         {
-                            if(change>0){
-                                change = 20 - (delt_val/25);
-                            }
+                            if(add_speed<5)add_speed++;
                             else{
-                                change = (delt_val/25)-20;
+                                if(change>0)
+                                {
+                                    auto_change = 1;//auto increase
+                                }
+                                else{
+                                    auto_change = 2;//auto decrease
+                                }
                             }
+                        }else{
+                            add_speed = 0;
+                            auto_change = 0;
                         }
+                        
                         change_speed = millis();
                     }
+                    if(millis()-auto_change_time>5){
+                        auto_change_time = millis();
+                        if(auto_change==1)change=1;
+                        else if(auto_change==2)change=-1;
+                    }
+                    
                     temp_val = DMX_Address_val + change;
-                    if(temp_val>511)temp_val=511;
-                    else if(temp_val<0)temp_val=0;
+                    if(temp_val>512){
+                        temp_val=512;
+                        auto_change=0;
+                    }
+                    else if(temp_val<1)
+                    {
+                        temp_val=1;
+                        auto_change=0;
+                    }
                     DMX_Address_val = temp_val;
                 break;
             }
@@ -167,7 +195,7 @@ class PM_DmxaddressMenu : public SmoothSelector
         _ft->_canvas->setTextSize(1);
         _ft->_canvas->setTextDatum(top_center);
         _ft->_canvas->setTextColor(0x000000);
-        _ft->_canvas->drawCentreString("DMX Address",120, 5);
+        _ft->_canvas->drawCentreString("SET DMX ADDRESS",120, 5);
         // Redner options
         int index = 0;
         _ft->_canvas->setColor(TFT_BLUE);
@@ -224,14 +252,14 @@ class PM_DmxaddressMenu : public SmoothSelector
         {
             _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
             _ft->_canvas->setTextColor(TFT_BLACK);
-            _ft->_canvas->setTextSize(0.8);
-            _ft->_canvas->drawCentreString("apply successed",120, 62);
+            _ft->_canvas->setTextSize(1);
+            _ft->_canvas->drawCentreString("APPLY SUCCESSED",120, 62);
         }else if(millis() - show_massage1_timout <2000)
         {
             _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
             _ft->_canvas->setTextColor(TFT_BLACK);
-            _ft->_canvas->setTextSize(0.8);
-            _ft->_canvas->drawCentreString("save successed",120, 62);
+            _ft->_canvas->setTextSize(1);
+            _ft->_canvas->drawCentreString("SAVE SUCCESSED",120, 62);
         }
 
         // Push
@@ -309,7 +337,7 @@ void pm_dmxaddressMenu_task(FactoryTest* ft)
         _launcher_menu->addOption(opt[i]);
     }
     _launcher_menu->moveTo(3);
-
+    printf("init app\n");
     while(1)
     {
         _launcher_menu->update(millis());

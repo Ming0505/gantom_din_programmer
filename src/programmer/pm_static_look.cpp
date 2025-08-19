@@ -47,7 +47,11 @@ static int _last_enc_postion = 0;
 static bool show_massage = false;
 static int show_massage_timout = 0;
 Button_state button_check(FactoryTest* ft);
+void init_button_check();
 uint32_t change_speed=0;
+uint32_t auto_change_time=0;
+int dmx_val_auto_change = 0;
+int dmx_val_change_factor=0;
 class PM_StaticLookMenu : public SmoothOptions
 {
     bool _wait_button_released = false;
@@ -105,16 +109,28 @@ class PM_StaticLookMenu : public SmoothOptions
             int32_t change = newPos - _last_enc_postion;
             if(change != 0){
                 int32_t delt_val = millis()-change_speed;
-                if(delt_val<=500)
-                {
-                    if(change>0){
-                        change = 20 - (delt_val/25);
-                    }
-                    else{
-                        change = (delt_val/25)-20;
-                    }
-                }
                 change_speed = millis();
+                if(delt_val<=100)
+                {
+                    if(dmx_val_change_factor<4)dmx_val_change_factor++;
+                    else{
+                        if(change>0)
+                        {
+                            dmx_val_auto_change = 1;//auto increase
+                        }
+                        else{
+                            dmx_val_auto_change = 2;//auto decrease
+                        }
+                    }
+                }else{
+                    dmx_val_change_factor = 0;
+                    dmx_val_auto_change = 0;
+                }
+            }
+            if(millis()-auto_change_time>5){
+                auto_change_time = millis();
+                if(dmx_val_auto_change==1)change=1;
+                else if(dmx_val_auto_change==2)change=-1;
             }
             currentValue += change;
             _last_enc_postion = newPos;
@@ -137,7 +153,7 @@ class PM_StaticLookMenu : public SmoothOptions
         _ft->_canvas->setTextSize(1);
         _ft->_canvas->setTextDatum(top_center);
         _ft->_canvas->setTextColor(0x000000);
-        _ft->_canvas->drawCentreString("Static Look",120, 5);
+        _ft->_canvas->drawCentreString("SET DEFAULT OUTPUT",120, 5);
         // Render options
         int y_offset = 6;
         for (int i = getKeyframeList().size() - 1; i >= 0; i--)
@@ -201,8 +217,8 @@ class PM_StaticLookMenu : public SmoothOptions
             {
                 _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
                 _ft->_canvas->setTextColor(TFT_BLACK);
-                _ft->_canvas->setTextSize(0.8);
-                _ft->_canvas->drawCentreString("save successed",120, 62);
+                _ft->_canvas->setTextSize(1);
+                _ft->_canvas->drawCentreString("SAVE SUCCESSED",120, 62);
             }
 
         }
@@ -311,6 +327,16 @@ unsigned long _pressStartTime = 0;
 unsigned long _lastClickTime = 0;
 unsigned long _doubleClickTime = 0;
 bool _first_click = false;
+void init_button_check()
+{
+    _waitingRelease = false;
+    _isPressing = false;
+    _pressStartTime = 0;
+ // For checking button double click
+    _lastClickTime = 0;
+    _doubleClickTime = 0;
+    _first_click = false;
+}
 Button_state button_check(FactoryTest* ft)
 {
     // Handle button press using the factory test's button
