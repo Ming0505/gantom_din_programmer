@@ -75,6 +75,7 @@ uint8_t Address[10] = {0x91, 0x20, 0x11, 0xAA, 0, 1, 0x55, 0, 1, 0};    // Addre
 uint8_t lock_9600[10] = {0x91, 0x20, 0x11, 0x12, 0x4c, 0x4f, 0x34, 0x43, 0x4b, 0};
 uint8_t unlock_9600[10] = {0x91, 0x20, 0x11, 0x12, 0x75, 0x6e, 0x34, 0x6c, 0x6b, 0};
 uint8_t KeepAlive[10] = {0x91, 0x20, 0x11, 1, 1, 1, 1, 1, 1, 0};
+uint8_t setChannel[10] = {0x91, 0x20, 0x11, 0x77, 0, 1, 0x33, 0, 1, 0}; // Standalone setting command
 void pm_DMX::writeAddress(int address)
     {
         uint8_t check_sum=0;
@@ -204,6 +205,20 @@ void pm_DMX::keep_alive(void)
         data_high();
         ets_delay_us(525);
         gpio_uart_send_bytes(KeepAlive, 10);
+    }
+
+void pm_DMX::set_channel(void)
+    {
+        uint8_t check_sum=0;
+        for(int i=0;i<9;i++){
+            check_sum+=setChannel[i];
+        }
+        setChannel[9]=check_sum;
+        data_low();
+        delay(2);
+        data_high();
+        ets_delay_us(525);
+        gpio_uart_send_bytes(setChannel, 10);
     }
 
 void pm_DMX::end()

@@ -28,6 +28,7 @@ public:
   void write_LOCK_9600_baud(void);
   void write_UNLOCK_9600_baud(void);
   void keep_alive(void);
+  void set_channel(void);
   void update(/*bool DMX_mode*/);
   void end();
 };

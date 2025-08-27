@@ -52,6 +52,7 @@ uint32_t change_speed=0;
 uint32_t auto_change_time=0;
 int dmx_val_auto_change = 0;
 int dmx_val_change_factor=0;
+bool set_channel = false;
 class PM_StaticLookMenu : public SmoothOptions
 {
     bool _wait_button_released = false;
@@ -80,6 +81,7 @@ class PM_StaticLookMenu : public SmoothOptions
             break;
             case Double_clicked:
                 show_massage_timout = millis();
+                set_channel = true;
                 nvs_save_dmxdata();
             break;
             default:
@@ -99,6 +101,7 @@ class PM_StaticLookMenu : public SmoothOptions
                 }
                 _last_enc_postion = newPos;
             }
+            dmx_val_auto_change=0;
         }
         else
         {
@@ -309,8 +312,13 @@ void pm_staticlookMenu_task(FactoryTest* ft)
        _pm_dmx->update();
        if (millis() - time_static_look > 100)
         {
-        _pm_dmx->keep_alive();
-        time_static_look = millis();
+            _pm_dmx->keep_alive();
+            time_static_look = millis();
+        }
+       if(set_channel)
+        {
+            set_channel = false;
+            _pm_dmx->set_channel();
         }
         _launcher_menu->update(millis());
         if(!_launcher_menu->get_active()){
