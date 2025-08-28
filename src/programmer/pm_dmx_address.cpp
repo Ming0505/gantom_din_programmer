@@ -110,7 +110,8 @@ class PM_DmxaddressMenu : public SmoothSelector
                     }else{
                         val_100 = temp_val;
                     }
-                    if(((val_10*10 + val_1)>11)&&(val_100>4))val_100=4;
+                    if(((val_100*100) + (val_10*10) +val_1)>512)val_100=4;
+                    //if(((val_10*10 + val_1)>12)&&(val_100>4))val_100=4;
                     DMX_Address_val = val_100*100 + val_10*10 + val_1;
                 break;
                 case 1:
@@ -125,7 +126,7 @@ class PM_DmxaddressMenu : public SmoothSelector
                     }else{
                         val_10 = temp_val;
                     }
-                    if(val_100==5 && val_10>1)val_10=1;
+                    if(((val_100*100) + (val_10*10) +val_1)>512)val_10=0;
                     DMX_Address_val = val_100*100 + val_10*10 + val_1;
                 break;
                 case 2:
