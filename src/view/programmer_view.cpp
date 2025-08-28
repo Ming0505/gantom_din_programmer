@@ -41,7 +41,7 @@ constexpr AppOptionRenderProps_t _app_render_props_list[] = {
     {0xB8DBD9, 0x385B59, "SET DMX ADDRESS", "SET.."},
     {0x87C38F, 0x07430F, "SET DMX OUTPUT", "SET.."},
     {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
-    {0xFFFF00, 0x49496E, "RESET", "RES.."},
+    {0xFFFF00, 0x49496E, "ADDRESS RESET", "ADD.."},
     {0xCEDBB8, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
 };
 
