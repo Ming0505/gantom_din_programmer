@@ -218,10 +218,10 @@ class PM_StaticLookMenu : public SmoothOptions
             // Render notific message
             if(millis() - show_massage_timout <2000)
             {
-                _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
+                _ft->_canvas->fillSmoothRoundRect(0, 50, 240, 30, 0,TFT_SILVER);
                 _ft->_canvas->setTextColor(TFT_BLACK);
                 _ft->_canvas->setTextSize(1);
-                _ft->_canvas->drawCentreString("SAVE SUCCESSED",120, 62);
+                _ft->_canvas->drawCentreString("SAVE SUCCESSED",120, 52);
             }
 
         }
