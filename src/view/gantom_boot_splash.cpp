@@ -51,21 +51,22 @@ void GantomBootSplash::_drawSplash()
     int centerY = _ft->_canvas->height() / 2;
     
     // Draw logo outline
-    _ft->_canvas->fillRoundRect(centerX - 70, centerY - 40, 160, 80, 10, 0xFFFF);
+    //_ft->_canvas-> drawRoundRect(1, 0, 238, 134, 0, 0xFFFF);
+    _ft->_canvas->fillRoundRect(centerX - 80, centerY - 40, 160, 80, 10, 0xFFFF);
     
     // Draw text
     _ft->_canvas->setTextColor(0x0000);  // Black text on white logo
     _ft->_canvas->setFont(&fonts::efontCN_24_b);
     _ft->_canvas->setTextSize(2);
-    _ft->_canvas->drawCenterString("GANTOM", centerX+10, centerY - 30);
+    _ft->_canvas->drawCenterString("GANTOM", centerX, centerY - 30);
     _ft->_canvas->setFont(&fonts::efontCN_24);
     _ft->_canvas->setTextSize(1);
-    _ft->_canvas->drawCenterString("DMX TOOL", centerX+10, centerY + 15);
+    _ft->_canvas->drawCenterString("DMX TOOL", centerX, centerY + 15);
+    
     
     // Version info
     _ft->_canvas->setTextColor(0xFFFF);  // White text on black background
     _ft->_canvas->setTextSize(1);
-    _ft->_canvas->drawCenterString("v1.2", centerX+10, centerY + 40);
-
+    _ft->_canvas->drawCenterString("v1.3", centerX, centerY + 40);
     _ft->_canvas_update();
 } 
