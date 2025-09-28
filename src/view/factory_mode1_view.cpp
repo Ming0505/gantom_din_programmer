@@ -17,23 +17,21 @@
 
 
 static FactoryTest* _ft = nullptr;
-static pm_DMX* pm_dmx = nullptr;
+static pm_DMX* _pm_dmx = nullptr;
 
 using namespace SmoothUIToolKit;
 using namespace SmoothUIToolKit::SelectMenu;
 
-void pm_staticlookMenu_set_pmdmxptr(pm_DMX* pm_dmx);
-void pm_staticlookMenu_task(FactoryTest* ft);
-void pm_silent_boot_toggle_set_pmdmxptr(pm_DMX* pm_dmx);
-void pm_silent_boot_toggle_task(FactoryTest* ft);
-void pm_dmxaddressMenu_set_pmdmxptr(pm_DMX* pm_dmx);
-void pm_dmxaddressMenu_task(FactoryTest* ft);
-void pm_settingsMenu_task(FactoryTest* ft);
-void pm_dmx_settingsMenu_task(FactoryTest* ft);
-void fa1_Menu_task(FactoryTest* ft);
-void fa1_set_pmdmxptr(pm_DMX* pm_dmx);
-void fa2_Menu_task(FactoryTest* ft);
-void fa2_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_1ch_test_task(FactoryTest* ft);
+void pm_1ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_2ch_test_task(FactoryTest* ft);
+void pm_2ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_3ch_test_task(FactoryTest* ft);
+void pm_3ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_4ch_test_task(FactoryTest* ft);
+void pm_4ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_7ch_test_task(FactoryTest* ft);
+void pm_7ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
 
 void init_button_check();
 struct AppOptionRenderProps_t
@@ -43,39 +41,28 @@ struct AppOptionRenderProps_t
     const char* tag;
     const char* tag_string;
 };
-static bool isfactory_mode=false;
-constexpr int _app_render_props_list_size = 5;
-constexpr int _test_app_render_props_list_size = 3;
-AppOptionRenderProps_t _app_render_props_list[] = {
-    {0xB8DBD9, 0x385B59, "SET DMX ADDRESS", "SET.."},
-    {0x87C38F, 0x07430F, "SET DMX OUTPUT", "SET.."},
-    {0xCEDBB8, 0x4E5B38, "SILENT BOOT TOGGLE", "SIL.."},
-    {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
-    {0xFFFF00, 0x49496E, "ADDRESS RESET", "ADD.."},
-    //{0xCEDBB8, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
-};
-AppOptionRenderProps_t _test_app_render_props_list[] = {
-    {0xFFFF00, 0x49496E, "FACTORY MODEL 1", "FA1.."},
-    {0xB8DBD9, 0x385B59, "FACTORY MODEL 2", "FA2.."},
-    {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
+constexpr int _fa1_app_render_props_list_size = 6;
+
+constexpr AppOptionRenderProps_t _fa1_app_render_props_list[] = {
+    {0xCEDB20, 0x4E5B38, "1CH TEST", "1CH.."},
+    {0xCE20B8, 0x4E5B38, "2CH TEST", "2CH.."},
+    {0x20DBB8, 0x4E5B38, "3CH TEST", "3CH.."},
+    {0x20DB20, 0x4E5B38, "4CH TEST", "4CH.."},
+    {0xA05038, 0x4E5B38, "7CH TEST", "7CH.."},
+    {0xB00000, 0x4E5B38, "EXIT", "EXI"},
 };
 
-int _render_props_list_size = 5;
-AppOptionRenderProps_t *_render_props_list=nullptr;
 
-static Transition2D* _batv_panel_transition = nullptr;
-static std::uint32_t _batv_time_count = 0;
-static char _batv[10] = {0};
+static std::uint32_t _dmx_keeplive_time_count = 0;
 static int _last_enc_postion = 0;
 static bool _is_just_boot_in = true;
-uint32_t reset_success_count=0;
-class LauncherMenu : public SmoothOptions
+class LauncherMenuFA1 : public SmoothOptions
 {
     bool _wait_button_released = false;
     bool _is_pressing = false;
     bool _app_close_flag = false;
     int _matching_index = 0;
-
+    bool _isActive = true;
     void onReadInput() override
     {
         if (isOpening())
@@ -156,7 +143,7 @@ class LauncherMenu : public SmoothOptions
                                               getOptionCurrentFrame(_matching_index).w,
                                               getOptionCurrentFrame(_matching_index).h,
                                               20,
-                                              _render_props_list[_matching_index].theme_color);
+                                              _fa1_app_render_props_list[_matching_index].theme_color);
 
             // Render icons
             if (!isOpening())
@@ -173,7 +160,7 @@ class LauncherMenu : public SmoothOptions
                 if(i!=0)
                 {
                     _ft->_canvas->setTextSize(0.7);
-                    _ft->_canvas->drawString(_render_props_list[_matching_index].tag_string,
+                    _ft->_canvas->drawString(_fa1_app_render_props_list[_matching_index].tag_string,
                                         getOptionCurrentFrame(_matching_index).x + 45,
                                         y_offset+7);
                     _ft->_canvas->setTextSize(1);
@@ -184,15 +171,9 @@ class LauncherMenu : public SmoothOptions
             // Render tags
             if (i == 0 && !isOpening())
             {
-                _ft->_canvas->setTextColor(_render_props_list[_matching_index].tag_color);
-                _ft->_canvas->drawString(_render_props_list[_matching_index].tag, 227, 26);
+                _ft->_canvas->setTextColor(_fa1_app_render_props_list[_matching_index].tag_color);
+                _ft->_canvas->drawString(_fa1_app_render_props_list[_matching_index].tag, 227, 26);
             }
-        }
-        if(millis() - reset_success_count<800)
-        {
-            _ft->_canvas->fillSmoothRoundRect(0, 60, 240, 30, 0,TFT_SILVER);
-            _ft->_canvas->setTextColor(TFT_BLACK);
-            _ft->_canvas->drawCentreString("RESET SUCCESSED", 120, 63);
         }
 
         // Push
@@ -236,65 +217,64 @@ class LauncherMenu : public SmoothOptions
     {
         int matching_index = getSelectedOptionIndex();
         printf("open app\n");
-        if(isfactory_mode){
-            if (matching_index == 0){
-                fa1_Menu_task(_ft);
-            }  
-            else if (matching_index == 1){
-                fa2_Menu_task(_ft);
-            }
-            else if (matching_index == 2)
-            {
-                _ft->_power_off();
-                esp_restart();
-            } 
-        }else{
-            if (matching_index == 0){
-            printf("open app 0\n");
-            pm_dmxaddressMenu_task(_ft);
-            }  
-            else if (matching_index == 1){
-                printf("open app 1\n");
-                pm_staticlookMenu_task(_ft);
-            }
-            else if (matching_index == 2)
-            {
-                pm_silent_boot_toggle_task(_ft);
-            } 
-            else if (matching_index == 3)
-            {
-                //pm_settingsMenu_task(_ft);
-                _ft->_power_off();
-                esp_restart();
-            }  
-            else if (matching_index == 4)
-            {
-                //pm_dmx_settingsMenu_task(_ft);
-                pm_dmx->writeAddress(1);
-                reset_success_count = millis();
-
-            }
+        if (matching_index == 0)
+        {
+            //1CH TEST
+            pm_1ch_test_task(_ft);
         }
+        else if (matching_index == 1)
+        {
+            //2CH TEST
+            pm_2ch_test_task(_ft);
+        }
+        else if (matching_index == 2)
+        {
+            //3CH TEST
+            pm_3ch_test_task(_ft);
+        }
+        else if (matching_index == 3)
+        {
+            //4CH TEST
+            pm_4ch_test_task(_ft);
+        }
+        else if (matching_index == 4)
+        {
+            //7CH TEST
+            pm_7ch_test_task(_ft);
+        }
+        else if (matching_index == 5)
+        {
+            //EXIT TEST
+            _isActive = false;
+        }
+            
+        //_wait_button_released = true;
+        //_is_pressing = true;
         init_button_check();
         _app_close_flag = true;
     }
+public:
+    void set_ftptr(FactoryTest* ft)
+    {
+        _ft=ft;
+    }
+    FactoryTest* get_ftptr()
+    {
+        return _ft;
+    }
+    void set_active(bool _active)
+    {
+        _isActive=_active;
+    }
+    bool get_active()
+    {
+        return _isActive;
+    }
 };
 
-static LauncherMenu* _launcher_menu = nullptr;
+static LauncherMenuFA1* _launcher_menu = nullptr;
 
-void init_as_normal_mode()
-{
-    isfactory_mode = false;
-    _render_props_list_size = _app_render_props_list_size;
-    _render_props_list = _app_render_props_list;
-}
-void init_as_factory_mode()
-{
-    isfactory_mode = true;
-    _render_props_list_size = _test_app_render_props_list_size;
-    _render_props_list = _test_app_render_props_list;
-}
-void programmer_view_create(FactoryTest* ft)
+void fa1_view_create(FactoryTest* ft)
 {
     _ft = ft;
     _ft->_enc.setPosition(_last_enc_postion);
@@ -302,14 +282,14 @@ void programmer_view_create(FactoryTest* ft)
     _ft->_canvas->setTextSize(1);
 
     // Create menu
-    _launcher_menu = new LauncherMenu;
+    _launcher_menu = new LauncherMenuFA1;
 
     // Selected one
     _launcher_menu->addOption();
     _launcher_menu->setLastKeyframe({6, 6, 228, 64});
 
     // Waiting line
-    for (int i = 0; i < _render_props_list_size - 2; i++)
+    for (int i = 0; i < _fa1_app_render_props_list_size - 2; i++)
     {
         // I'm too lazy to use userdata to paas the props
         _launcher_menu->addOption();
@@ -327,24 +307,37 @@ void programmer_view_create(FactoryTest* ft)
     _launcher_menu->setPositionTransitionPath(EasingPath::easeOutBack);
     _launcher_menu->setShapeDuration(400);
 
-    pm_dmx = new pm_DMX();
-    pm_dmx->init();
-    pm_staticlookMenu_set_pmdmxptr(pm_dmx);
-    pm_dmxaddressMenu_set_pmdmxptr(pm_dmx);
-    pm_silent_boot_toggle_set_pmdmxptr(pm_dmx);
-    fa1_set_pmdmxptr(pm_dmx);
-    fa2_set_pmdmxptr(pm_dmx);
+    pm_1ch_test_set_pmdmxptr(_pm_dmx);
+    pm_2ch_test_set_pmdmxptr(_pm_dmx);
+    pm_3ch_test_set_pmdmxptr(_pm_dmx);
+    pm_4ch_test_set_pmdmxptr(_pm_dmx);
+    pm_7ch_test_set_pmdmxptr(_pm_dmx);
 }
 
-void programmer_view_update()
+void fa1_view_update()
 {
     _launcher_menu->update(millis());
 
     // Read bat voltage
-    if (millis() - _batv_time_count > 100)
+    if (millis() - _dmx_keeplive_time_count > 100)
     {
-        pm_dmx->keep_alive();
-        _batv_time_count = millis();
+        _pm_dmx->keep_alive();
+        _dmx_keeplive_time_count = millis();
+    }
+}
+void fa1_set_pmdmxptr(pm_DMX* pm_dmx)
+{
+    _pm_dmx = pm_dmx;
+}
+void fa1_Menu_task(FactoryTest* ft)
+{
+    fa1_view_create(ft);
+    while(1){
+        fa1_view_update();
+        if(!_launcher_menu->get_active()){
+            delete _launcher_menu;
+            break;
+        }
     }
 }
 
