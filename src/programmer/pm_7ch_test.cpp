@@ -35,7 +35,7 @@ class PM_ch7_test : public SmoothSelector
         {
             case Short_pressed:
                 ch7_test_step++;
-                if(ch7_test_step>7)ch7_test_step=0;
+                if(ch7_test_step>8)ch7_test_step=0;
                 for(uint8_t i=0;i<8;i++)
                 {
                     _pm_dmx->write(i,0);
@@ -179,6 +179,16 @@ class PM_ch7_test : public SmoothSelector
             _ft->_canvas->drawString("CH6: 255",180, 70);
             _ft->_canvas->drawString("CH7: 255",60, 90);
             _ft->_canvas->drawString("CH8: 255",180, 90);
+        }else if(ch7_test_step == 8){
+            _ft->_canvas->drawCentreString("STEP 9",120, 0);
+            _ft->_canvas->drawString("CH1:   0",60, 30); //brightness
+            _ft->_canvas->drawString("CH2:   0",180, 30);
+            _ft->_canvas->drawString("CH3:   0",60, 50);
+            _ft->_canvas->drawString("CH4:   0",180, 50);
+            _ft->_canvas->drawString("CH5:   0",60, 70);
+            _ft->_canvas->drawString("CH6:   0",180, 70);
+            _ft->_canvas->drawString("CH7:   0",60, 90);
+            _ft->_canvas->drawString("CH8:   0",180, 90);
         }
         
         // Push
