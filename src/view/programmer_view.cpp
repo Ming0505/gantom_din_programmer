@@ -24,10 +24,23 @@ using namespace SmoothUIToolKit::SelectMenu;
 
 void pm_staticlookMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_staticlookMenu_task(FactoryTest* ft);
+void pm_silent_boot_toggle_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_silent_boot_toggle_task(FactoryTest* ft);
 void pm_dmxaddressMenu_set_pmdmxptr(pm_DMX* pm_dmx);
 void pm_dmxaddressMenu_task(FactoryTest* ft);
 void pm_settingsMenu_task(FactoryTest* ft);
 void pm_dmx_settingsMenu_task(FactoryTest* ft);
+void pm_1ch_test_task(FactoryTest* ft);
+void pm_1ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_2ch_test_task(FactoryTest* ft);
+void pm_2ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_3ch_test_task(FactoryTest* ft);
+void pm_3ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_4ch_test_task(FactoryTest* ft);
+void pm_4ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+void pm_7ch_test_task(FactoryTest* ft);
+void pm_7ch_test_set_pmdmxptr(pm_DMX* pm_dmx);
+
 void init_button_check();
 struct AppOptionRenderProps_t
 {
@@ -37,12 +50,24 @@ struct AppOptionRenderProps_t
     const char* tag_string;
 };
 constexpr int _app_render_props_list_size = 4;
+constexpr int _app_render_props_list_size = 5;
 constexpr AppOptionRenderProps_t _app_render_props_list[] = {
     {0xB8DBD9, 0x385B59, "SET DMX ADDRESS", "SET.."},
     {0x87C38F, 0x07430F, "SET DMX OUTPUT", "SET.."},
+    {0xCEDBB8, 0x4E5B38, "SILENT BOOT TOGGLE", "SIL.."},
     {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
     {0xFFFF00, 0x49496E, "ADDRESS RESET", "ADD.."},
-    {0xCEDBB8, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
+    //{0xCEDBB8, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
+    {0xCEDB20, 0x4E5B38, "1CH TEST", "1CH.."},
+    {0xCE20B8, 0x4E5B38, "2CH TEST", "2CH.."},
+    {0x20DBB8, 0x4E5B38, "3CH TEST", "3CH.."},
+    {0x20DB20, 0x4E5B38, "4CH TEST", "4CH.."},
+    {0x4020B8, 0x4E5B38, "7CH TEST", "7CH.."},
+};
+constexpr AppOptionRenderProps_t _test_app_render_props_list[] = {
+    {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
+    {0xFFFF00, 0x49496E, "FACTORY MODEL 1", "FA1.."},
+    {0xB8DBD9, 0x385B59, "FACTORY MODEL 2", "FA2.."},
 };
 
 static Transition2D* _batv_panel_transition = nullptr;
@@ -183,7 +208,7 @@ class LauncherMenu : public SmoothOptions
             if (i == 0 && !isOpening())
             {
                 _ft->_canvas->setTextColor(_app_render_props_list[_matching_index].tag_color);
-                _ft->_canvas->drawString(_app_render_props_list[_matching_index].tag, 218, 26);
+                _ft->_canvas->drawString(_app_render_props_list[_matching_index].tag, 227, 26);
             }
         }
         if(millis() - reset_success_count<800)
@@ -244,19 +269,47 @@ class LauncherMenu : public SmoothOptions
         }
         else if (matching_index == 2)
         {
+            pm_silent_boot_toggle_task(_ft);
+        } 
+        else if (matching_index == 3)
+        {
             //pm_settingsMenu_task(_ft);
             _ft->_power_off();
             esp_restart();
         }  
-        else if (matching_index == 3)
+        else if (matching_index == 4)
         {
             //pm_dmx_settingsMenu_task(_ft);
             pm_dmx->writeAddress(1);
             reset_success_count = millis();
 
         }
-        else if (matching_index == 4)
-            _ft->_power_off();
+        else if (matching_index == 5)
+        {
+            //1CH TEST
+            pm_1ch_test_task(_ft);
+        }
+        else if (matching_index == 6)
+        {
+            //2CH TEST
+            pm_2ch_test_task(_ft);
+        }
+        else if (matching_index == 7)
+        {
+            //3CH TEST
+            pm_3ch_test_task(_ft);
+        }
+        else if (matching_index == 8)
+        {
+            //4CH TEST
+            pm_4ch_test_task(_ft);
+        }
+        else if (matching_index == 9)
+        {
+            //7CH TEST
+            pm_7ch_test_task(_ft);
+        }
+            
         //_wait_button_released = true;
         //_is_pressing = true;
         init_button_check();
@@ -303,6 +356,12 @@ void programmer_view_create(FactoryTest* ft)
     pm_dmx->init();
     pm_staticlookMenu_set_pmdmxptr(pm_dmx);
     pm_dmxaddressMenu_set_pmdmxptr(pm_dmx);
+    pm_silent_boot_toggle_set_pmdmxptr(pm_dmx);
+    pm_1ch_test_set_pmdmxptr(pm_dmx);
+    pm_2ch_test_set_pmdmxptr(pm_dmx);
+    pm_3ch_test_set_pmdmxptr(pm_dmx);
+    pm_4ch_test_set_pmdmxptr(pm_dmx);
+    pm_7ch_test_set_pmdmxptr(pm_dmx);
 }
 
 void programmer_view_update()
