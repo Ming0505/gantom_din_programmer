@@ -67,6 +67,6 @@ void GantomBootSplash::_drawSplash()
     // Version info
     _ft->_canvas->setTextColor(0xFFFF);  // White text on black background
     _ft->_canvas->setTextSize(1);
-    _ft->_canvas->drawCenterString("v1.3", centerX, centerY + 40);
+    _ft->_canvas->drawCenterString("v1.3.1", centerX, centerY + 40);
     _ft->_canvas_update();
 } 
