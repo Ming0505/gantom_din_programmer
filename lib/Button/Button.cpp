@@ -32,13 +32,21 @@ bool Button::read()
 	{
 		// ignore any changes during this period
 	}
-	
-	// pin has changed 
-	else if (digitalRead(_pin) != _state)
+	else
 	{
-		_ignore_until = millis() + _delay;
-		_state = !_state;
-		_has_changed = true;
+		// pin has changed 
+		int temp_state=0;
+		if(digitalRead(_pin)&&digitalRead(GPIO_NUM_1))
+		{
+			temp_state=1;
+		}
+		if (temp_state != _state)
+		{
+			_ignore_until = millis() + _delay;
+			_state = !_state;
+			_has_changed = true;
+		}
+		
 	}
 	
 	return _state;
