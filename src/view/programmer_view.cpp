@@ -35,6 +35,8 @@ void fa1_set_pmdmxptr(pm_DMX* pm_dmx);
 void fa2_Menu_task(FactoryTest* ft);
 void fa2_set_pmdmxptr(pm_DMX* pm_dmx);
 
+void nvs_clear_settings(void);
+
 void init_button_check();
 struct AppOptionRenderProps_t
 {
@@ -48,11 +50,11 @@ constexpr int _app_render_props_list_size = 5;
 constexpr int _test_app_render_props_list_size = 3;
 AppOptionRenderProps_t _app_render_props_list[] = {
     {0xB8DBD9, 0x385B59, "SET DMX ADDRESS", "SET.."},
-    {0x87C38F, 0x07430F, "SET DMX OUTPUT", "SET.."},
+    {0xF5B5F4, 0x07430F, "SET DMX OUTPUT", "SET.."},
     {0xCEDBB8, 0x4E5B38, "SILENT BOOT TOGGLE", "SIL.."},
-    {0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
-    {0xFFFF00, 0x49496E, "ADDRESS RESET", "ADD.."},
-    //{0xCEDBB8, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
+    //{0xEB7A24, 0x4E5B10, "POWER OFF", "POW.."},
+    {0xF6F697, 0x49496E, "ADDRESS RESET", "ADD.."},
+    {0xF8D0A1, 0x4E5B38, "RESET PROGRAMMER", "RES.."},
 };
 AppOptionRenderProps_t _test_app_render_props_list[] = {
     {0xFFFF00, 0x49496E, "FACTORY MODEL 1", "FA1.."},
@@ -264,13 +266,16 @@ class LauncherMenu : public SmoothOptions
             else if (matching_index == 3)
             {
                 //pm_settingsMenu_task(_ft);
-                _ft->_power_off();
-                esp_restart();
+                //_ft->_power_off();
+                //esp_restart();
+                pm_dmx->writeAddress(1);
+                reset_success_count = millis();
             }  
             else if (matching_index == 4)
             {
                 //pm_dmx_settingsMenu_task(_ft);
-                pm_dmx->writeAddress(1);
+                nvs_clear_settings();
+                esp_restart();
                 reset_success_count = millis();
 
             }
