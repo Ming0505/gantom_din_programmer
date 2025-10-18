@@ -28,7 +28,7 @@ static int _last_enc_postion = 0;
 
 Button_state button_check(FactoryTest* ft);
 void init_button_check();
-int DMX_Address_val = 0;
+int DMX_Address_val = 1;
 static int show_massage_timout = 0;
 static int show_massage1_timout = 0;
 static int add_speed = 0;

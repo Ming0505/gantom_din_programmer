@@ -28,9 +28,9 @@ void init_nvs_settings(void)
   if (preferences.getUChar("initFlag") != 0xA5)
   { // uninitialized EEPROM
     Serial.println("Initializing EEPROM for first time");
-    preferences.putUInt("DMX_START_CH", 1); //DMX èµ·å§‹é€šé“å€¼
-    preferences.putUInt("DMX_MAX_CH", 127);   //DMX æ”¯æŒçš„æœ€å¤§é€šé“æ•°
-    preferences.putUInt("DMX_ADDRESS", 0);  //DMX åœ°å€å€¼
+    preferences.putUInt("DMX_START_CH", 1); //DMX èµ·å§‹é€ÿéÿ“å€¼
+    preferences.putUInt("DMX_MAX_CH", 127);   //DMX æ”¯æÿÿçÿ„æÿ€å¤§é€ÿéÿ“æ•°
+    preferences.putUInt("DMX_ADDRESS", 1);  //DMX åÿ°åÿ€å€¼
     preferences.putUInt("numOfReboots", 0);
 
     for (int i = 0; i < 512; i++)
@@ -50,7 +50,7 @@ void init_nvs_settings(void)
     Serial.println("Loading preferences");
     _start_ch = preferences.getUInt("DMX_START_CH", 1);
     _max_ch = preferences.getUInt("DMX_MAX_CH", 127);
-    DMX_Address_val = preferences.getUInt("DMX_ADDRESS", 1);  //DMX åœ°å€å€¼
+    DMX_Address_val = preferences.getUInt("DMX_ADDRESS", 1);  //DMX åÿ°åÿ€å€¼
     numOfReboots = preferences.getUInt("numOfReboots", 0);
 
     
@@ -73,11 +73,16 @@ void nvs_save_dmxdata(void)
 
 void nvs_save_dmxsettings(void)
 {
-  preferences.putUInt("DMX_START_CH", _start_ch); //DMX èµ·å§‹é€šé“å€¼
-  preferences.putUInt("DMX_MAX_CH", _max_ch);   //DMX æ”¯æŒçš„æœ€å¤§é€šé“æ•°
+  preferences.putUInt("DMX_START_CH", _start_ch); //DMX èµ·å§‹é€ÿéÿ“å€¼
+  preferences.putUInt("DMX_MAX_CH", _max_ch);   //DMX æ”¯æÿÿçÿ„æÿ€å¤§é€ÿéÿ“æ•°
 }
 
 void nvs_save_dmxaddress(void)
 {
-  preferences.putUInt("DMX_ADDRESS", DMX_Address_val);  //DMX åœ°å€å€¼
+  preferences.putUInt("DMX_ADDRESS", DMX_Address_val);  //DMX åÿ°åÿ€å€¼
+}
+
+void nvs_clear_settings(void)
+{
+  preferences.putUChar("initFlag", 0xFF);
 }
