@@ -26,11 +26,7 @@ void setup()
     // Create boot splash and show it
     _bootSplash1 = new GantomBootSplash(&ft);
     _bootSplash1->show(3000); // Show for 3 seconds or until interaction
-    if(digitalRead(GPIO_NUM_1)){
-        init_as_normal_mode();
-    }else{
-        init_as_factory_mode();
-    }
+    init_as_normal_mode();
     programmer_view_create(&ft);
     init_nvs_settings();
 }

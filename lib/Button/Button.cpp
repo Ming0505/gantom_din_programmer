@@ -36,7 +36,7 @@ bool Button::read()
 	{
 		// pin has changed 
 		int temp_state=0;
-		if(digitalRead(_pin)&&digitalRead(GPIO_NUM_1))
+		if(digitalRead(_pin))
 		{
 			temp_state=1;
 		}
